@@ -98,5 +98,6 @@ void mainloop();
 faults_t checkFaults();
 void checkCANMessages();
 void sendHeartbeat();
+void sendChargeStatus();
 
 #endif

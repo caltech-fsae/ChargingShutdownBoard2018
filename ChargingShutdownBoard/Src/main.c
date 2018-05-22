@@ -116,10 +116,11 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   Schedule schedule;
-  MakeSchedule(&schedule, 3);
+  MakeSchedule(&schedule, 4);
   AddTask(&schedule, &mainloop, 500);
   AddTask(&schedule, &checkCANMessages, 1);
   AddTask(&schedule, &sendHeartbeat, 700);
+  AddTask(&schedule, &sendChargeStatus, 1400);
   while (1)
   {
 	 RunSchedule(&schedule);

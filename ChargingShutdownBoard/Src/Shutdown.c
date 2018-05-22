@@ -13,9 +13,9 @@ void init() {
 
 void mainloop()
 {
-	if(BMS_timeout_counter <= 0) {
+	/*if(BMS_timeout_counter <= 0) {
 		assertFLT_NR();
-	}
+	}*/
 	if(HAL_GetTick() > STARTUP_GRACE_PERIOD) {
 		if(state == STATE_GRACE)
 			state = STATE_IMD_GRACE;
@@ -39,7 +39,6 @@ void mainloop()
 	can_msg_t can_msg;
 	CAN_short_msg(&can_msg, create_ID(BID_SHUTDOWN, MID_FAULT_STATUS), msg);
 	CAN_queue_transmit(&can_msg);
-
 	if ((faults.lv_battery_fault || faults.interlock_in_fault || faults.ams_fault || faults.bspd_fault) && state != STATE_GRACE) {
 		assertFLT_NR();
 	}
@@ -61,12 +60,6 @@ void mainloop()
 		CAN_queue_transmit(&fault_msg);
 	}
 
-	if(!faults.flt_fault && !faults.flt_nr_fault)
-	{
-		can_msg_t charge_msg;
-		CAN_short_msg(&charge_msg, create_ID(BID_SHUTDOWN, IS_CHARGING), 1);
-		CAN_queue_transmit(&charge_msg);
-	}
 	BMS_timeout_counter--;
 }
 void checkCANMessages()
@@ -120,6 +113,19 @@ void sendHeartbeat()
 		can_msg_t msg;
 		CAN_short_msg(&msg, create_ID(BID_SHUTDOWN, MID_HEARTBEAT), 0);
 		CAN_queue_transmit(&msg);
+
+	}
+}
+
+//Checks for faults, if no faults and in running state then
+//the board sends the is_charging message.
+void sendChargeStatus()
+{
+	faults_t faults = checkFaults();
+	if(state == STATE_RUN && !(faults.flt_fault) && !(faults.flt_nr_fault)){
+		can_msg_t charge_msg;
+		CAN_short_msg(&charge_msg, create_ID(BID_SHUTDOWN, IS_CHARGING), 0);
+		CAN_queue_transmit(&charge_msg);
 	}
 }
 
